@@ -5,4 +5,3 @@ for digit_a in range(0, 10):
             print("{}{}".format(digit_a, digit_b))
         else:
             print("{}{}".format(digit_a, digit_b), end=", ")
-
