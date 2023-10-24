@@ -14,7 +14,7 @@ class Square:
         self.size = size
 
     @property
-    def size(size):
+    def size(self):
         """Property for the length of a square.
 
         Raises:
