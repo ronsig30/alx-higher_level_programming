@@ -1,84 +1,82 @@
-#include <stdio.h>
-#include <python.h>
-#include <stdlib.h>
-#include <floatobject.h>
+#include <Python.h>
 
 /**
- * print_python_float - outputs info about python float
- * @p: pointer to pyobject struct
+ * print_python_list - Print information about a Python list object.
+ * @p: PyObject pointer to the list.
  */
-void print_python_float(pyobject *p)
-{
-	double t;
-
-		setbuff(stdout, NULL);
-		printf("{.} float object info\n");
-		if (strcmp(p->ob_type->tp_name, "float"))
-		{
-			printf(" {ERROR} Invalid Float Object\n}";
-			return;
-		}
-	f = ((PyFloatObject *)p)->ob_fval;
-		print(" value: %s\n",
-		PyOS_double_to_string(f, 'r', 0, Py_DTSF_ADD_DOT_0, NULL));
-}
-
-/**
- * print_python_bytes - Outputs python bytes
- * @p: Pointer to pyobject struct
- */
-
-void print_python_bytes(PyObject *p)
-{
-	size_t i, len, size;
-	char *str;
-
-	setbuff(stdout, NULL);
-	printf("[.] bytes objects info\n");
-	if (strcmp(p->ob_type->tp_name, "bytes"))
-	{
-		printf(" [ERROR} Invalid Bytes Object\n");
-		return;
-	}
-	size = ((PyVarObject *)p)->ob_size;
-	str = ((PybytesObject *)p)->ob_sval;
-	len = size + 1 > 10 ? 10 : size + 1;
-	printf(" size %lu\n", size);
-	printf(" trying string: %s\n", str);
-	printf(" first %lu bytes: ", len);
-	for (i = 0; i < len; i++)
-		printf("%02hhx%s", str[i], i + 1 < len ? " " : "");
-	printf("\n");
-}
-
-/**
- * print_python_list - Outputs info about python list
- * @p: pointer to pyobject struct
- *
- */
-
 void print_python_list(PyObject *p)
 {
-	int i;
+    Py_ssize_t size, i;
+    PyObject *item;
 
-	setbuff(stdout, NULL);
-	printf("{*} Python list info\n");
-	if (strcmp(p->ob_type->tp_name, "list"))
-	{
-		printf(" {ERROR} Invalid List Object\n")
-		return;
-	}
-	printf("{*} size of the Python List = %lu\n", ((PyVarObject *)p)->ob_size);
-	printf("{*} Allocated = %lu\n", ((PyListObject *)p)->allocated);
-	for (i = 0; i < ((PyVarObject *)p)->ob_size; i++)
-	{
-		printf("Element %d: %s\n", i,
-			((PyListObject *)p)->ob_item[i]->ob_type->tp_name);
-		if (!strcmp((PyListObject *)p)->ob_item[i]->ob_type->tp_name,
-			"bytes")
-			print_python_bytes(((PyListObject *)p)->ob_item[i]);
-		else if (!strcmp(((PyListObject *)p)->ob_item[i]->ob_type->tp_name,
-			"float"))
-			print_python_float(((PyListObject *)p)->ob_item[i]);
-	}
+    if (PyList_Check(p))
+    {
+        size = PyList_Size(p);
+        printf("[*] Python list info\n");
+        printf("[*] Size of the Python List = %ld\n", size);
+        printf("[*] Allocated = %ld\n", ((PyListObject *)p)->allocated);
+
+        for (i = 0; i < size; i++)
+        {
+            item = PyList_GetItem(p, i);
+            printf("Element %ld: %s\n", i, Py_TYPE(item)->tp_name);
+        }
+    }
+    else
+    {
+        printf("  [ERROR] Invalid List Object\n");
+    }
+}
+
+/**
+ * print_python_bytes - Print information about a Python bytes object.
+ * @p: PyObject pointer to the bytes object.
+ */
+void print_python_bytes(PyObject *p)
+{
+    Py_ssize_t size, i;
+    char *str;
+
+    if (PyBytes_Check(p))
+    {
+        size = PyBytes_Size(p);
+        printf("[.] Python bytes object info\n");
+        printf("  [.] Size: %ld\n", size);
+        str = PyBytes_AsString(p);
+
+        printf("  [.] Trying string: %s\n", str);
+        printf("  [.] First %ld bytes: ", (size > 10) ? 10 : size);
+        for (i = 0; i < size && i < 10; i++)
+        {
+            printf("%02hhx", str[i]);
+            if (i < 9)
+                printf(" ");
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("  [ERROR] Invalid Bytes Object\n");
+    }
+}
+
+/**
+ * print_python_float - Print information about a Python float object.
+ * @p: PyObject pointer to the float object.
+ */
+void print_python_float(PyObject *p)
+{
+    char *repr;
+
+    if (PyFloat_Check(p))
+    {
+        printf("[.] Python float info\n");
+        repr = PyOS_double_to_string(PyFloat_AS_DOUBLE(p), 'r', 0,
+		Py_DTSF_ADD_DOT_0, NULL);
+        printf("  [.] value: %s\n", repr);
+    }
+    else
+    {
+        printf("  [ERROR] Invalid Float Object\n");
+    }
 }
