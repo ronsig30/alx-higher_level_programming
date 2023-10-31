@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-This module multiply 2 matricies using numpy module
+The module multiply 2 matricies using numpy module
 """
 import numpy
 
